@@ -12,26 +12,24 @@ Second, we define a new metric to measure the amount of time to complete the tas
 
 |Methods|STS (all)|STS (N$\geq$4)|
 |:----:|:----:|:----:|
-|PPO|0.122||
-|NIE|0.137||
-|HER|0.125||
-|PPO+intent|0.143||
-|CaMP|**0.151**||
-
-In summary, 
+|PPO|0.122|0.054|
+|NIE|0.137|0.088|
+|HER|0.125|0.051|
+|PPO+intent|0.143|0.086|
+|CaMP|**0.151**|**0.092**|
 
 Q2. Eval on data subsets. The reviewer suggests that "I would argue in favor of forming two splits of the dataset, one where no non-interactive agent trajectory exists; and one where an optimal non-interactive agent will need to take a longer path".
 
-A2. We appreciate the suggestion and form a split of dataset where non-interactive trajectories (longer than the shortest path) exist to enrich the evaluation. We first calculate the ratio of that split in the whole dataset: 20.5% (overall), 27.4% (1 $\sim$ 2 rooms), 18.6% (3 $\sim$ 5 rooms), 12.4% (6 $\sim$ 10 rooms). Then we report the performance of models (a non-interactive PPO trained on ProcTHOR is included) on the new split in the table below.
+A2. We appreciate the suggestion and form a split of dataset where non-interactive trajectories (longer than the shortest path) exist to enrich the evaluation. We first calculate the ratio of that split in the whole dataset: 20.5% (overall), 27.4% (1 $\sim$ 2 rooms), 18.6% (3 $\sim$ 5 rooms), 12.4% (6 $\sim$ 10 rooms). Then we report the performance of models (a non-interactive PPO trained on ProcTHOR is included) on the new split in the table below. It's interesting to find that PPO without interaction achieves better STS (0.201) compared with PPO (0.181), although it obtains lower SR on the non-interactive set (47.4%) and the whole set (21.5%). It indicates that the strategy of object interaction may cost unnecessary time in uncrowded environments and the agent needs to balance the efficiency and efficacy during the task.
 
 |Methods|SR (%)|SPL|STS|FDT|
 |:----:|:----:|:----:|:----:|:----:|
-|PPO (non-inter)|||||
-|PPO|||||
-|NIE|||||
-|HER|||||
-|PPO+intent|||||
-|CaMP|||||
+|PPO (non-inter)|47.4|0.309|0.201|4.62|
+|PPO|51.5|0.306|0.181|3.44|
+|NIE|58.8|0.345|0.188|3.01|
+|HER|51.9|0.316|0.176|3.40|
+|PPO+intent|70.4|0.390|0.222|2.38|
+|CaMP|**72.3**|**0.407**|**0.236**|**2.05**|
 
 Q3.  Concept clarification.
 
@@ -58,4 +56,30 @@ In Section 4, we apply counterfactual policy to a hierarchical decision framewor
 
 Second, we believe the sum of actions from sub-control policies weighted by master policy’s decision can fully represent agent’s hierarchical intent, since it contains agent’s intent on each atomic action and the full distributional information of four policies. Since the primary definition of intent is “action before execution” that $I=i_t=f_i(s_t,o_t)$, we don’t see the rationale of using hidden features from GRU as intent instead of action logits. The relationship between intent and confounding bias is elaborated above.
 
-Third, 
+Third, we find the idea of extending the recursive feedback to multiple levels interesting since it may explore the effect of recursive intent, namely the intent generated based on a priori intent. And we are training new models based on the baseline of PPO to study how a recursive intent may help the policy learning. Nonetheless, we believe implementing agent’s intent with an intent policy is reasonable and it’s flexible for us to utilize old intent from iterations behind to balance the policy exploration.
+
+Q2. Missing details and confusions.
+
+A2. Thanks for pointing them out and we will reply to them item by item as follows.
+
+o) When taking Push/Pick actions, the object to interact would be the closest pushable/pickable (predefined according to category) and observable (within 1.25m) object.
+
+o) The amount of force applied on the object during the Push action is 100 Newton.
+
+o) The dimension of intent embedding is 12, equivalent to the size of our action space.
+
+o) The CNN is implemented as a simple CNN and the number of GRU layers is 1, which is in line with prior work [2] and the default setting of AllenAct.
+
+o) “Epochs with a rollout of data” refers to the number of update iterations using a rollout of data in PPO.
+
+o) In the HRL baseline, the master policy calls one of the sub-policies (with the same splits of action space of our model) at each step and the action is output by the sub-policy.
+
+o) It’s a typo and both should be step penalty $r_{sp}=0.01$.
+
+o) The reward for interactive auxiliary tasks should be $r_{inter}=r+r_{as}-r{af}$, where $r=r_{success}+\Delta_{dis}-r_{sp}$ and r_{success} is obtained when the goal of interactive task is achieved (taking Done when the obstacle is cleared).
+
+**References**
+
+[1] Zhang, Junzhe, and Elias Bareinboim. Markov decision processes with unobserved confounders: A causal approach. Technical report, Technical Report R-23, Purdue AI Lab, 2016.
+
+[2] Zeng, Kuo-Hao, et al. "Pushing it out of the way: Interactive visual navigation." Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2021.
