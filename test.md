@@ -128,3 +128,21 @@ A6. We elaborate our idea of "intent-aware counterfactual exploration" as follow
 [1] Ehsani, Kiana, et al. "Manipulathor: A framework for visual object manipulation." Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. 2021.
 
 [2] Xiang, Fanbo, et al. "Sapien: A simulated part-based interactive environment." Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2020.
+
+
+**Reviewer 4**
+
+Thanks to the reviewer for the appreciation and suggestions for our work. We address the concerns in the following lines.
+
+Q1. Paper writing clarity. The reviewer questions about "the difference between do(A) and A", "what the counterfactual situations here are (e.g., more examples like L131-133)", and "In Figure 3, is the entire model differentiable?"
+
+A1. Thanks for the suggestion and we will revise our paper to further elaborate on the causal preliminaries. Our replies to the questions are as below:
+
+* Do-calculus $do(A=a)$ is an intervention operation that actively sets the variable $A$ as $a$ in the system while keeping the rest of the system unchanged, and the postintervention distribution $P(R|do(A=a))$ is obtained [1]. On the contrary, the conditional distribution $P(R|A=a)$ is observed passively in the condition when $A$ appears to be $a$. Thus the actions executed by embodied agents can naturally be regarded as interventions do(A) to the environment. Formally in our case (Figure 2(a)), distribution $P(R=r|do(a))=\sum_{x} P(r|a,s)P(s)$, while $P(R=r|a)=\sum_{x} P(r|a,s)P(s|a)$. Since the agent decides the action $a$ based on the observation of state $s$, the distributions of $a$ and $s$ are not independent, which results in $P(s)\neq P(s|a)$ and $P(R=r|do(A=a))\neq P(R=r|A=a)$.
+* The counterfactual situation we discuss $R_{A=a}|A=i$ can be understood as the result the agent would obtain had it taken action $a$, given that it intends to take $i$. For example, in the initial stage of training, when encountering a table the agent may intend to bypass the obstacle since it lacks interaction skills and interactions empirically lead to low reward. With the help of counterfactual policy, the agent may explore the counterfactual situation when it tries to push the table aside given its intent is to rotate right. Once the interaction successfully clears the path, the agent will obtain a relatively higher reward than navigation, which becomes a valuable experience for the agent to learn interactive strategy.
+* The entire model is differentiable, because the integrated intent $i_t$ is obtained with
+the weighted-sum of low-level action distribution. However, we do not update the intent network with gradients from the loss. Instead the parameters of the intent network are updated by synchronization with the master policy.
+
+Q2. State vs. obstacles as confounding factors. The reviewer questions that "But at a high level, isn't the state variable itself a confounding factor? What is the value is isolating only obstacles here?"
+
+A2. 
