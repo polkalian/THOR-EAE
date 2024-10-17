@@ -1,9 +1,5 @@
 # THOR-EAE
-To download our dataset, visit the link below:
-
-```
-wget 8.137.38.62:8080/data/THOR-EAE.tar.gz
-```
+To download our dataset, visit the [link](https://drive.google.com/file/d/1ktENON22ZxcPZ45rfPc6o2aEZ3o7OnBN/view?usp=sharing).
 
 ## Structure of dataset THOR-EAE
 
